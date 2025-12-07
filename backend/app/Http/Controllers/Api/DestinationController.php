@@ -11,6 +11,23 @@ use Illuminate\Support\Facades\Storage;
 class DestinationController extends Controller
 {
     /**
+     * Helper Private: Format Image URL
+     * Agar tidak mengulang kodingan di index dan show
+     */
+    private function formatImageUrl($url)
+    {
+        if (!$url) return null;
+
+        // Cek apakah ini URL online (http/https) seperti Unsplash
+        if (filter_var($url, FILTER_VALIDATE_URL)) {
+            return $url;
+        }
+
+        // Jika bukan, berarti file lokal di storage
+        return asset('storage/' . $url);
+    }
+
+    /**
      * PUBLIC: Menampilkan daftar wisata (List & Search)
      */
     public function index(Request $request)
@@ -33,9 +50,9 @@ class DestinationController extends Controller
         // Urutkan dari yang terbaru
         $destinations = $query->latest()->get();
 
-        // Transform data agar URL gambar lengkap
+        // Transform data agar URL gambar benar (Lokal vs Online)
         $data = $destinations->map(function ($item) {
-            $item->image_url = $item->image_url ? asset('storage/' . $item->image_url) : null;
+            $item->image_url = $this->formatImageUrl($item->image_url);
             return $item;
         });
 
@@ -51,8 +68,8 @@ class DestinationController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
-        // Siapkan URL gambar
-        $imageUrl = $destination->image_url ? asset('storage/' . $destination->image_url) : null;
+        // Format URL gambar menggunakan helper
+        $imageUrl = $this->formatImageUrl($destination->image_url);
 
         return response()->json([
             'data' => [
@@ -88,7 +105,6 @@ class DestinationController extends Controller
             'price' => 'required|numeric|min:0',
             'location' => 'required|string',
             'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048', // Max 2MB
-
             'meta_title' => 'nullable|string|max:100',
             'meta_description' => 'nullable|string|max:255',
             'meta_keywords' => 'nullable|string',
@@ -101,6 +117,9 @@ class DestinationController extends Controller
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('destinations', 'public');
             $validated['image_url'] = $path;
+            
+            // Hapus key 'image' agar tidak error saat create (karena kolom db namanya image_url)
+            unset($validated['image']);
         }
 
         // Simpan ke Database
@@ -138,14 +157,19 @@ class DestinationController extends Controller
 
         // Cek jika ada upload gambar baru
         if ($request->hasFile('image')) {
-            // Hapus gambar lama
-            if ($destination->image_url && Storage::disk('public')->exists($destination->image_url)) {
+            // Hapus gambar lama (Hanya jika file lokal, bukan URL online)
+            if ($destination->image_url && 
+                !filter_var($destination->image_url, FILTER_VALIDATE_URL) && 
+                Storage::disk('public')->exists($destination->image_url)) {
                 Storage::disk('public')->delete($destination->image_url);
             }
 
             // Upload yang baru
             $path = $request->file('image')->store('destinations', 'public');
             $validated['image_url'] = $path;
+            
+            // Hapus key 'image'
+            unset($validated['image']);
         }
 
         $destination->update($validated);
@@ -164,7 +188,9 @@ class DestinationController extends Controller
         $destination = Destination::findOrFail($id);
 
         // Hapus file gambar fisik dari storage
-        if ($destination->image_url && Storage::disk('public')->exists($destination->image_url)) {
+        if ($destination->image_url && 
+            !filter_var($destination->image_url, FILTER_VALIDATE_URL) && 
+            Storage::disk('public')->exists($destination->image_url)) {
             Storage::disk('public')->delete($destination->image_url);
         }
 
