@@ -12,7 +12,7 @@ export default function RegisterPage() {
     email: '',
     phone_number: '',
     password: '',
-    password_confirmation: ''
+    password_confirmation: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -36,17 +36,15 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        // Handle validasi error dari Laravel
         if (data.errors) {
-            const firstError = Object.values(data.errors)[0] as string[];
-            throw new Error(firstError[0]);
+          const firstError = Object.values(data.errors)[0] as string[];
+          throw new Error(firstError[0]);
         }
         throw new Error(data.message || 'Registrasi gagal');
       }
 
-      // SUKSES: Login otomatis (karena backend mengirim token saat register)
       login(data.access_token, data.user);
-      
+
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -57,10 +55,11 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-10">
       <div className="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden">
-        
+
+        {/* HEADER */}
         <div className="bg-[#F57C00] p-6 text-center">
-           <h1 className="text-2xl font-bold text-white">Buat Akun Baru</h1>
-           <p className="text-orange-100 text-sm">Mulai petualangan wisatamu!</p>
+          <h1 className="text-2xl font-bold text-white">Buat Akun Baru</h1>
+          <p className="text-orange-100 text-sm">Mulai petualangan wisatamu!</p>
         </div>
 
         <div className="p-8">
@@ -71,46 +70,90 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+
             {/* Nama */}
             <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input name="name" type="text" placeholder="Nama Lengkap" required onChange={handleChange} className="w-full pl-10 p-3 rounded-xl border border-gray-200 outline-none focus:border-[#F57C00]"/>
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
+              <input
+                name="name"
+                type="text"
+                placeholder="Nama Lengkap"
+                required
+                onChange={handleChange}
+                className="w-full pl-10 p-3 rounded-xl border border-gray-300 text-gray-800 placeholder-gray-500 outline-none focus:border-[#F57C00] focus:ring-1 focus:ring-[#F57C00]"
+              />
             </div>
 
             {/* Email */}
             <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input name="email" type="email" placeholder="Email Address" required onChange={handleChange} className="w-full pl-10 p-3 rounded-xl border border-gray-200 outline-none focus:border-[#F57C00]"/>
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
+              <input
+                name="email"
+                type="email"
+                placeholder="Email Address"
+                required
+                onChange={handleChange}
+                className="w-full pl-10 p-3 rounded-xl border border-gray-300 text-gray-800 placeholder-gray-500 outline-none focus:border-[#F57C00] focus:ring-1 focus:ring-[#F57C00]"
+              />
             </div>
 
-            {/* No HP */}
+            {/* Nomor HP */}
             <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input name="phone_number" type="text" placeholder="Nomor WhatsApp" required onChange={handleChange} className="w-full pl-10 p-3 rounded-xl border border-gray-200 outline-none focus:border-[#F57C00]"/>
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
+              <input
+                name="phone_number"
+                type="text"
+                placeholder="Nomor WhatsApp"
+                required
+                onChange={handleChange}
+                className="w-full pl-10 p-3 rounded-xl border border-gray-300 text-gray-800 placeholder-gray-500 outline-none focus:border-[#F57C00] focus:ring-1 focus:ring-[#F57C00]"
+              />
             </div>
 
             {/* Password */}
             <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input name="password" type="password" placeholder="Password (Min. 8)" required onChange={handleChange} className="w-full pl-10 p-3 rounded-xl border border-gray-200 outline-none focus:border-[#F57C00]"/>
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
+              <input
+                name="password"
+                type="password"
+                placeholder="Password (Min. 8)"
+                required
+                onChange={handleChange}
+                className="w-full pl-10 p-3 rounded-xl border border-gray-300 text-gray-800 placeholder-gray-500 outline-none focus:border-[#F57C00] focus:ring-1 focus:ring-[#F57C00]"
+              />
             </div>
 
             {/* Confirm Password */}
             <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input name="password_confirmation" type="password" placeholder="Ulangi Password" required onChange={handleChange} className="w-full pl-10 p-3 rounded-xl border border-gray-200 outline-none focus:border-[#F57C00]"/>
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
+              <input
+                name="password_confirmation"
+                type="password"
+                placeholder="Ulangi Password"
+                required
+                onChange={handleChange}
+                className="w-full pl-10 p-3 rounded-xl border border-gray-300 text-gray-800 placeholder-gray-500 outline-none focus:border-[#F57C00] focus:ring-1 focus:ring-[#F57C00]"
+              />
             </div>
 
-            <button type="submit" disabled={isLoading} className="w-full bg-[#0B2F5E] hover:bg-[#061A35] text-white font-bold py-3 rounded-xl mt-2 transition-all flex justify-center">
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-[#0B2F5E] hover:bg-[#061A35] text-white font-bold py-3 rounded-xl mt-2 transition-all flex justify-center disabled:opacity-70"
+            >
               {isLoading ? <Loader2 className="animate-spin" /> : 'Daftar Akun'}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-gray-500 text-sm">
+          <p className="mt-6 text-center text-gray-600 text-sm">
             Sudah punya akun?{' '}
-            <Link href="/login" className="text-[#F57C00] font-bold hover:underline">Login disini</Link>
+            <Link href="/login" className="text-[#F57C00] font-bold hover:underline">
+              Login disini
+            </Link>
           </p>
         </div>
+
       </div>
     </div>
   );
